@@ -17,7 +17,9 @@ var _superagentPromise = require('superagent-promise');
 
 var _superagentPromise2 = _interopRequireDefault(_superagentPromise);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : { default: obj };
+}
 
 var request = (0, _superagentPromise2.default)(_superagent2.default, _bluebird2.default);
 var route = function route(path) {
@@ -30,52 +32,58 @@ var sms = function sms(to, token) {
     return request.post(route('/sms')).set('Access-Token', token).set('Accept', 'application/json').send({ numero_destino: to, mensagem: cobrancaInText });
 };
 
-var call = function call(from, to, token, tipo,texto,voz,velocidade,mp3) {
-        let stringTipo = "alo";
-        if(tipo == 0) { stringTipo = Math.floor((Math.random()*6) + 1); }
-        if(tipo > 0) { stringTipo= tipo}
-        let definirVoz = 'br-Ricardo';
-        let velocidadeVoz = 1;
-        console.log("teste:");
-        console.log(texto);
-        console.log(from);
-        console.log(voz);
-        console.log(velocidade);
-        console.log(mp3);
+var call = function call(from, to, token, tipo) {
+    var stringTipo = "alo";
+    if (tipo == 0) {
+        tipo = Math.floor(Math.random() * 6 + 1);
+    }
+    
 
-        if(voz == 1) { definirVoz = 'br-Vitoria'}
-        if(voz == 2) { definirVoz = 'en-Joey'}
-        if(voz == 3) { definirVoz = 'rus-Maxim'}
-        if(velocidade != undefined) {
-        velocidadeVoz = velocidade.toString();
-        }
-        let somFinal = 'http://8balls.com.br/sejavip2/'+stringTipo+'.mp3';
-        if(mp3 != undefined) {
-            somFinal = mp3;
-        }
-        let dados = {
-                url_audio: somFinal
-            };
-            let tipoAcao = 'audio';
-        if(texto != undefined) {
-                tipoAcao = 'tts';
-            dados = {
-                "mensagem": texto,
-                "velocidade": velocidadeVoz,
-                "tipo_voz": definirVoz
-            }
-        }
-        console.log(tipoAcao);
-        console.log(somFinal);
+    switch(tipo) {
+    case 1:
+	//Manter essa linha para Eliminar a opçao 1 (ligacao muda)
+	//"Vocês já estão bravos? Não? Então espera ai."
+        stringTipo = 'http://eriberto.pro.br/files/a-silence.mp3';
+        break;
+    case 2:
+	//Manter essa linha para Eliminar a opçao 2 (ligacao muda)
+	//"Alô? Alô? Alô? Oi, está me ouvindo? Então espera ai que já te ligo de novo."
+        stringTipo = 'http://eriberto.pro.br/files/a-silence.mp3';
+        break;
+    case 3:
+	//Manter essa linha para adicionar darthVader
+	//"Você irá receber ligações infinitamente, até que pare de ligar no meu número"
+        stringTipo = 'http://www.orangefreesounds.com/wp-content/uploads/2014/09/Darth-vader-breathing.mp3';
+        break;
+    /**case 4:
+	//Manter essa linha para Eliminar a opçao 4 (ligacao muda)
+	//"Esse é meu jeito de viver, ninguém nunca foi igual, a minha vida é fazer, o bem vencer o mal, pelo mundo viajarei tentando encontrar, o pokemon e com o seu poder tudo transformar"
+        stringTipo = 'http://eriberto.pro.br/files/a-silence.mp3';
+        break;**/
+    case 5:
+	//Manter essa linha para Eliminar a opçao 5 (ligacao muda)
+	//"Olá, tudo bem? Parece que o jogo virou, não é mesmo? Vou te ligar repetidamente, igual vocês fazem comigo"
+        stringTipo = 'http://eriberto.pro.br/files/a-silence.mp3';
+        break;
+    case 6:
+	//Criando nova opção de gemidao
+        stringTipo = 'https://github.com/haskellcamargo/gemidao-do-zap/raw/master/resources/gemidao.mp3';
+        break;
+    default:
+	//Linha padrao do script original
+        stringTipo = 'http://8balls.com.br/sejavip2/' + tipo+'.mp3';
+    } 
+
     return request.post(route('/composto')).set('Access-Token', token).set('Accept', 'application/json').send({
         numero_destino: to,
         dados: [{
-            acao: tipoAcao,
-            acao_dados: dados
+            acao: 'audio',
+            acao_dados: {
+                url_audio: stringTipo
+            }
         }],
         bina: from
     });
-
 };
 
 function cobranca(args) {
@@ -87,7 +95,7 @@ function cobranca(args) {
         return (0, _bluebird.reject)(new Error('Número de telefone inválido'));
     }
 
-    var action = args.sms ? sms(args.para, args.token) : call(args.de, args.para, args.token, args.tipo,args.texto,args.voz,args.velocidade,args.mp3);
+    var action = args.sms ? sms(args.para, args.token) : call(args.de, args.para, args.token, args.tipo);
 
     return action.catch(function (err) {
         if (err.status === 405 || err.status === 403) {
